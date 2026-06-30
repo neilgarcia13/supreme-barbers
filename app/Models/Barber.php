@@ -10,7 +10,6 @@ class Barber extends Model
         'first_name',
         'last_name',
         'birthdate',
-        'bio',
         'photo_path',
         'is_active',
     ];

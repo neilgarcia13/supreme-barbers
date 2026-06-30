@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->date('birthdate');
-            $table->text('bio')->nullable();
             $table->string('photo_path')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
