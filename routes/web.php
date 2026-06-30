@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BarberController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -9,7 +10,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    // admin-only routes go here
+    Route::inertia('/admin/dashboard', 'admin/dashboard')->name('admin.dashboard');
+
+    Route::get('/admin/barbers', [BarberController::class, 'index'])->name('admin.barbers.index');
+    Route::post('/admin/barbers', [BarberController::class, 'store'])->name('admin.barbers.store');
+    Route::put('/admin/barbers/{barber}', [BarberController::class, 'update'])->name('admin.barbers.update');
+    Route::delete('/admin/barbers/{barber}', [BarberController::class, 'destroy'])->name('admin.barbers.destroy');
 });
 
 require __DIR__.'/settings.php';
