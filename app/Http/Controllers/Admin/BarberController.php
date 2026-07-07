@@ -15,7 +15,11 @@ class BarberController extends Controller
      */
     public function index()
     {
-        return Inertia::render('admin/barbers/index');
+        $barbers = Barber::query()->latest()->get();
+
+        return Inertia::render('admin/barbers/index', [
+            'barbers' => $barbers,
+        ]);
     }
 
     /**

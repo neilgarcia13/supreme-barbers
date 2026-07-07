@@ -13,7 +13,24 @@ import {
 } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
 
-const index = () => {
+type Barber = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  birthdate: string;
+  photo_path: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+type Props = {
+  barbers: Barber[];
+}
+
+
+
+const Index = ({ barbers }: Props) => {
   return (
     <>
       <Head title="Barbers" />
@@ -28,22 +45,24 @@ const index = () => {
         </div>
         <div>
           <Table>
-            <TableCaption>A list of your recent invoices.</TableCaption>
+            <TableCaption>A list of all existing barbers.</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-25">Invoice</TableHead>
+                <TableHead>First Name</TableHead>
+                <TableHead>Last Name</TableHead>
+                <TableHead>Birthdate</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">INV001</TableCell>
-                <TableCell>Paid</TableCell>
-                <TableCell>Credit Card</TableCell>
-                <TableCell className="text-right">$250.00</TableCell>
+              {barbers.map((barber) => (
+                <TableRow>
+                <TableCell className="font-medium">{barber.first_name}</TableCell>
+                <TableCell>{barber.last_name}</TableCell>
+                <TableCell>{barber.birthdate}</TableCell>
+                <TableCell>{barber.is_active ? 'Active' : 'Inactive'}</TableCell>
               </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>
@@ -52,7 +71,7 @@ const index = () => {
   );
 }
 
-index.layout = {
+Index.layout = {
   breadcrumbs: [
     {
       title: 'Barbers',
@@ -61,4 +80,4 @@ index.layout = {
   ],
 };
 
-export default index;
+export default Index;

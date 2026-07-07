@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
 import { Head, Link, useForm } from "@inertiajs/react";
-import { SubmitEvent } from "react";
+import { SubmitEvent, useState } from "react";
 
 const Create = () => {
 
@@ -21,7 +21,7 @@ const Create = () => {
     e.preventDefault();
     post('/admin/barbers');
   }
-
+  
   return (
     <div>
       <div className='flex gap-2 items-center px-8 py-4 text-xl font-semibold'>
@@ -98,7 +98,7 @@ const Create = () => {
                 checked={data.is_active}
                 onCheckedChange={(checked) => setData('is_active', checked)}
               />
-              <Label htmlFor="is_active">Active</Label>
+              <Label htmlFor="is_active">{data.is_active ? 'Active' : 'Inactive'}</Label>
             </div>
             {errors.is_active && (
               <p className="text-sm text-destructive">{errors.is_active}</p>
