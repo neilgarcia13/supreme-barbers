@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Admin\StoreBarberRequest;
+use App\Http\Requests\Admin\UpdateBarberRequest;
+use App\Models\Barber;
 use Inertia\Inertia;
 
 class BarberController extends Controller
@@ -27,9 +29,11 @@ class BarberController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreBarberRequest $request)
     {
-        //
+        Barber::create($request->validated());
+
+        return redirect()->route('admin.barbers.index');
     }
 
     /**
