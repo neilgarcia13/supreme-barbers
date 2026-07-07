@@ -23,7 +23,11 @@ class UpdateBarberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'birthdate' => ['required', 'date', 'before:today'],
+            'photo_path' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['required', 'boolean'],
         ];
     }
 }

@@ -56,7 +56,7 @@ index.layout = {
   breadcrumbs: [
     {
       title: 'Barbers',
-      href: index(),
+      href: '/admin/barbers',
     },
   ],
 };
