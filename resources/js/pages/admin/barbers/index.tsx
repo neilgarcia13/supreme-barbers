@@ -46,6 +46,7 @@ const Index = ({ barbers }: Props) => {
             <TableCaption>A list of all existing barbers.</TableCaption>
             <TableHeader>
               <TableRow>
+                <TableHead>Barber ID</TableHead>
                 <TableHead>First Name</TableHead>
                 <TableHead>Last Name</TableHead>
                 <TableHead>Birthdate</TableHead>
@@ -55,10 +56,11 @@ const Index = ({ barbers }: Props) => {
             <TableBody>
               {barbers.map((barber) => (
                 <TableRow>
-                <TableCell className="font-medium">{barber.first_name}</TableCell>
-                <TableCell>{barber.last_name}</TableCell>
-                <TableCell>{barber.birthdate}</TableCell>
-                <TableCell>{barber.is_active ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell className="font-medium">{barber.id}</TableCell>
+                  <TableCell>{barber.first_name}</TableCell>
+                  <TableCell>{barber.last_name}</TableCell>
+                  <TableCell>{barber.birthdate}</TableCell>
+                  <TableCell>{barber.is_active ? 'Active' : 'Inactive'}</TableCell>
               </TableRow>
               ))}
             </TableBody>
