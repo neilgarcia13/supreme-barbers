@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
-import { useForm } from "@inertiajs/react";
+import { Link, useForm } from "@inertiajs/react";
 import { SubmitEvent } from "react";
 
 const Create = () => {
@@ -21,7 +21,31 @@ const Create = () => {
     e.preventDefault();
     post('/admin/barbers');
   }
-  
+
+  const calculateAge = (birthdate: string) => {
+    if (!birthdate) {
+      return '';
+    }
+
+    const today = new Date();
+    const birthDate = new Date(birthdate);
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const hasBirthdayPassedThisYear =
+        today.getMonth() > birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() &&
+            today.getDate() >= birthDate.getDate());
+
+    if (!hasBirthdayPassedThisYear) {
+        age--;
+    }
+
+    return age.toString();
+  }
+
+  const age = calculateAge(data.birthdate);
+
   return (
     <div>
       <div className='flex gap-2 items-center px-8 py-4 text-xl font-semibold'>
@@ -74,7 +98,7 @@ const Create = () => {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="age">Age</Label>
-            <Input id="age" name="age" disabled />
+            <Input id="age" name="age" value={age} readOnly />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -107,7 +131,9 @@ const Create = () => {
 
           <div className="flex gap-4 mt-2">
             <Button className="cursor-pointer" disabled={processing}>Submit</Button>
-            <Button variant='ghost' type="button" className="cursor-pointer">Cancel</Button>
+            <Link href='/admin/barbers'>
+              <Button variant='ghost' type="button" className="cursor-pointer">Cancel</Button>
+            </Link>
           </div>
         </form>
       </div>

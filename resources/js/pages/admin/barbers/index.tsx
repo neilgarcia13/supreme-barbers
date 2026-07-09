@@ -28,8 +28,6 @@ type Props = {
   barbers: Barber[];
 }
 
-
-
 const Index = ({ barbers }: Props) => {
   return (
     <>

@@ -25,7 +25,12 @@ class UpdateBarberRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'birthdate' => ['required', 'date', 'before:today'],
+            'birthdate' => [
+                'required',
+                'date',
+                'before_or_equal:' . now()->subYears(18)->toDateString(),
+                'after_or_equal:' . now()->subYears(80)->toDateString(),
+            ],
             'photo_path' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'is_active' => ['required', 'boolean'],
         ];
