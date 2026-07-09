@@ -35,7 +35,13 @@ class BarberController extends Controller
      */
     public function store(StoreBarberRequest $request)
     {
-        Barber::create($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('photo_path')) {
+            $validated['photo_path'] = $request->file('photo_path')->store('barbers', 'public');
+        }
+
+        Barber::create($validated);
 
         return redirect()->route('admin.barbers.index');
     }

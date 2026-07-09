@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
-import { Head, Link, useForm } from "@inertiajs/react";
-import { SubmitEvent, useState } from "react";
+import { useForm } from "@inertiajs/react";
+import { SubmitEvent } from "react";
 
 const Create = () => {
 
@@ -13,7 +13,7 @@ const Create = () => {
     first_name: '',
     last_name: '',
     birthdate: '',
-    photo_path: '',
+    photo_path: null as File | null,
     is_active: true,
   });
 
@@ -78,12 +78,12 @@ const Create = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="photo_path">Photo Path</Label>
+            <Label htmlFor="photo_path">Profile Photo</Label>
             <Input
               id="photo_path"
               name="photo_path"
-              value={data.photo_path}
-              onChange={(e) => setData('photo_path', e.target.value)}
+              type="file"
+              onChange={(e) => setData('photo_path', e.target.files?.[0] ?? null)}
             />
             {errors.photo_path && (
               <p className="text-sm text-destructive">{errors.photo_path}</p>

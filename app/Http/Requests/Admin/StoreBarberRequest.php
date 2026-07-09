@@ -26,7 +26,7 @@ class StoreBarberRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'birthdate' => ['required', 'date', 'before:today'],
-            'photo_path' => ['nullable', 'string', 'max:255'],
+            'photo_path' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'is_active' => ['required', 'boolean'],
         ];
     }
