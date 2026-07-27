@@ -37,6 +37,11 @@ class StoreReservationRequest extends FormRequest
                 'date',
                 'after:now'
             ],
+            'notes' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
         ];
     }
 

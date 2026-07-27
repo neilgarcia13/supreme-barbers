@@ -12,6 +12,7 @@ class Reservation extends Model
         'barber_id',
         'starts_at',
         'ends_at',
+        'notes',
         'status',
     ];
 
