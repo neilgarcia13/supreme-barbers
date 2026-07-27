@@ -1,6 +1,5 @@
-import { Head } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Plus, PenBox, Trash2 } from 'lucide-react';
 
 import {
   Table,
@@ -51,6 +50,7 @@ const Index = ({ barbers }: Props) => {
                 <TableHead>Last Name</TableHead>
                 <TableHead>Birthdate</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className='text-center'>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -61,7 +61,28 @@ const Index = ({ barbers }: Props) => {
                   <TableCell>{barber.last_name}</TableCell>
                   <TableCell>{barber.birthdate}</TableCell>
                   <TableCell>{barber.is_active ? 'Active' : 'Inactive'}</TableCell>
-              </TableRow>
+                  <TableCell>
+                    <div className='flex gap-2 justify-center'>
+                      <Link href={`/admin/barbers/${barber.id}/edit`}>
+                        <Button size='sm' variant='outline'>
+                          <PenBox />
+                          Edit
+                        </Button>
+                      </Link>
+                      <Button
+                        size='sm'
+                        variant='destructive'
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this barber?')) {
+                            router.delete(`/admin/barbers/${barber.id}`);
+                          }
+                        }}>
+                        <Trash2 />
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
               ))}
             </TableBody>
           </Table>

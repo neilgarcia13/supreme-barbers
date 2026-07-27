@@ -57,24 +57,38 @@ class BarberController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Barber $barber)
     {
-        //
+        return Inertia::render('admin/barbers/edit', [
+            'barber' => $barber,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateBarberRequest $request, Barber $barber)
     {
-        //
+        $validated = $request->validated();
+
+        if ($request->hasFile('photo_path')) {
+            $validated['photo_path'] = $request->file('photo_path')->store('barbers', 'public');
+        } else {
+            unset($validated['photo_path']);
+        }
+
+        $barber->update($validated);
+
+        return redirect()->route('admin.barbers.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Barber $barber)
     {
-        //
+        $barber->delete();
+
+        return redirect()->route('admin.barbers.index');
     }
 }
