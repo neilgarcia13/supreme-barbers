@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreBarberRequest;
 use App\Http\Requests\Admin\UpdateBarberRequest;
 use App\Models\Barber;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class BarberController extends Controller
@@ -70,14 +71,20 @@ class BarberController extends Controller
     public function update(UpdateBarberRequest $request, Barber $barber)
     {
         $validated = $request->validated();
+        $oldPhotoPath = $barber->photo_path;
+        $hasNewPhoto = $request->hasFile('photo_path');
 
-        if ($request->hasFile('photo_path')) {
+        if ($hasNewPhoto) {
             $validated['photo_path'] = $request->file('photo_path')->store('barbers', 'public');
         } else {
             unset($validated['photo_path']);
         }
 
         $barber->update($validated);
+
+        if ($hasNewPhoto && $oldPhotoPath) {
+            Storage::disk('public')->delete($oldPhotoPath);
+        }
 
         return redirect()->route('admin.barbers.index');
     }
@@ -87,6 +94,10 @@ class BarberController extends Controller
      */
     public function destroy(Barber $barber)
     {
+        if ($barber->photo_path) {
+            Storage::disk('public')->delete($barber->photo_path);
+        }
+
         $barber->delete();
 
         return redirect()->route('admin.barbers.index');
