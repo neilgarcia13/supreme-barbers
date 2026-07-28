@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\ReservationController;
+use App\Http\Controllers\Api\Customer\ReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
