@@ -1,16 +1,25 @@
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
-import type { BreadcrumbItem } from '@/types';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
+import CustomerLayout from './customer/customer-layout';
+import type { AppLayoutProps } from '@/types';
+import { usePage } from '@inertiajs/react';
 
 export default function AppLayout({
-    breadcrumbs = [],
     children,
-}: {
-    breadcrumbs?: BreadcrumbItem[];
-    children: React.ReactNode;
-}) {
+    breadcrumbs,
+}: AppLayoutProps) {
+    const { auth } = usePage().props;
+
+    if (auth.user.role === 'customer') {
+        return (
+            <CustomerLayout breadcrumbs={breadcrumbs}>
+                {children}
+            </CustomerLayout>
+        );
+    }
+
     return (
-        <AppLayoutTemplate breadcrumbs={breadcrumbs}>
+        <AppSidebarLayout breadcrumbs={breadcrumbs}>
             {children}
-        </AppLayoutTemplate>
+        </AppSidebarLayout>
     );
 }
