@@ -5,8 +5,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\ReserveController;
 
+// Public routes
 Route::inertia('/', 'welcome')->name('home');
 
+// Shared post-login redirect
 Route::get('/dashboard', function (Request $request) {
     return match ($request->user()->role) {
         'admin' => redirect()->route('admin.dashboard'),
@@ -15,6 +17,7 @@ Route::get('/dashboard', function (Request $request) {
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Customer reservation pages
 Route::middleware(['auth', 'verified', 'customer'])->group(function () {
     Route::get('/reserve', [ReserveController::class, 'index'])
         ->name('customer.reserve');
@@ -23,6 +26,7 @@ Route::middleware(['auth', 'verified', 'customer'])->group(function () {
         ->name('customer.reserve.create');
 });
 
+// Admin management pages
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::inertia('/admin/dashboard', 'admin/dashboard')->name('admin.dashboard');
 
@@ -45,4 +49,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('admin.barbers.edit');
 });
 
+// Account settings routes
 require __DIR__ . '/settings.php';
