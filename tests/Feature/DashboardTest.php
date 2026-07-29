@@ -7,10 +7,42 @@ test('guests are redirected to the login page', function () {
     $response->assertRedirect(route('login'));
 });
 
-test('authenticated users can visit the dashboard', function () {
-    $user = User::factory()->create();
-    $this->actingAs($user);
+test('customers are redirected from dashboard to reserve', function () {
+    $customer = User::factory()->create([
+        'role' => 'customer',
+    ]);
 
-    $response = $this->get(route('dashboard'));
-    $response->assertOk();
+    $this->actingAs($customer)
+        ->get(route('dashboard'))
+        ->assertRedirect(route('customer.reserve'));
+});
+
+test('admins are redirected from dashboard to admin dashboard', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('dashboard'))
+        ->assertRedirect(route('admin.dashboard'));
+});
+
+test('customers can access the reserve page', function () {
+    $customer = User::factory()->create([
+        'role' => 'customer',
+    ]);
+
+    $this->actingAs($customer)
+        ->get(route('customer.reserve'))
+        ->assertOk();
+});
+
+test('admins cannot access the reserve page', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('customer.reserve'))
+        ->assertForbidden();
 });

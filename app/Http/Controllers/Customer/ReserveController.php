@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Http\Controllers\Customer;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Barber;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class ReserveController extends Controller
+{
+    public function index(): Response
+    {
+        return Inertia::render('customer/reserve/index');
+    }
+
+    public function create(Barber $barber): Response
+    {
+        abort_unless($barber->is_active, 404);
+
+        return Inertia::render('customer/reserve/create', [
+            'barber' => $barber->only([
+                'id',
+                'first_name',
+                'last_name',
+                'photo_path',
+            ]),
+        ]);
+    }
+}
