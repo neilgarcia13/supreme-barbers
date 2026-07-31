@@ -6,8 +6,12 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\Customer\BarberAvailabilityController;
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/reservations', [ReservationController::class, 'store'])->name('api.reservations.store');
+Route::middleware(['auth:sanctum', 'customer'])->group(function () {
+    Route::get('/reservations', [ReservationController::class, 'index'])
+        ->name('api.reservations.index');
+
+    Route::post('/reservations', [ReservationController::class, 'store'])
+        ->name('api.reservations.store');
 });
 
 Route::get('/barbers/{barber}/availability', BarberAvailabilityController::class)

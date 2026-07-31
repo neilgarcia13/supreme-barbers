@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Customer;
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreReservationRequest;
 use App\Models\Reservation;
@@ -12,6 +13,57 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ReservationController extends Controller
 {
+    public function index(Request $request): JsonResponse
+    {
+        $now = now();
+
+        $baseQuery = $request->user()
+            ->reservations()
+            ->with('barber:id,first_name,last_name,photo_path');
+
+        $upcoming = (clone $baseQuery)
+            ->where('status', 'confirmed')
+            ->where('starts_at', '>', $now)
+            ->orderBy('starts_at')
+            ->get([
+                'id',
+                'barber_id',
+                'starts_at',
+                'ends_at',
+                'status',
+                'notes',
+            ])
+            ->map(
+                fn(Reservation $reservation) =>
+                $this->reservationData($reservation)
+            );
+
+        $history = (clone $baseQuery)
+            ->where(function ($query) use ($now): void {
+                $query
+                    ->where('status', '!=', 'confirmed')
+                    ->orWhere('starts_at', '<=', $now);
+            })
+            ->orderByDesc('starts_at')
+            ->get([
+                'id',
+                'barber_id',
+                'starts_at',
+                'ends_at',
+                'status',
+                'notes',
+            ])
+            ->map(
+                fn(Reservation $reservation) =>
+                $this->reservationData($reservation)
+            );
+
+        return response()->json([
+            'upcoming' => $upcoming,
+            'history' => $history,
+        ]);
+    }
+
     public function store(StoreReservationRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -48,5 +100,22 @@ class ReservationController extends Controller
             'reservation' => $reservation,
         ], Response::HTTP_CREATED);
 
+    }
+
+    private function reservationData(Reservation $reservation): array
+    {
+        return [
+            'id' => $reservation->id,
+            'starts_at' => $reservation->starts_at->toIso8601String(),
+            'ends_at' => $reservation->ends_at->toIso8601String(),
+            'status' => $reservation->status,
+            'notes' => $reservation->notes,
+            'barber' => [
+                'id' => $reservation->barber->id,
+                'first_name' => $reservation->barber->first_name,
+                'last_name' => $reservation->barber->last_name,
+                'photo_path' => $reservation->barber->photo_path,
+            ],
+        ];
     }
 }
