@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reservation extends Model
@@ -14,6 +15,12 @@ class Reservation extends Model
         'ends_at',
         'notes',
         'status',
+        'active_slot_key',
+        'cancelled_at',
+    ];
+
+    protected $attributes = [
+        'status' => 'confirmed',
     ];
 
     protected function casts(): array
@@ -21,6 +28,7 @@ class Reservation extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'cancelled_at' => 'datetime',
         ];
     }
 
@@ -32,5 +40,30 @@ class Reservation extends Model
     public function barber(): BelongsTo
     {
         return $this->belongsTo(Barber::class);
+    }
+
+    public static function makeActiveSlotKey(
+        int $barberId,
+        CarbonInterface $startsAt
+    ): string {
+        return sprintf(
+            '%d:%s',
+            $barberId,
+            $startsAt->copy()->utc()->format('Y-m-d\TH:i:s\Z')
+        );
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Reservation $reservation): void {
+            if ($reservation->status !== 'confirmed') {
+                return;
+            }
+
+            $reservation->active_slot_key = self::makeActiveSlotKey(
+                (int) $reservation->barber_id,
+                $reservation->starts_at
+            );
+        });
     }
 }

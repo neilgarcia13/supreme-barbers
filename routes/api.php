@@ -12,6 +12,11 @@ Route::middleware(['auth:sanctum', 'customer'])->group(function () {
 
     Route::post('/reservations', [ReservationController::class, 'store'])
         ->name('api.reservations.store');
+
+    Route::patch(
+        '/reservations/{reservation}/cancel',
+        [ReservationController::class, 'cancel']
+    )->name('api.reservations.cancel');
 });
 
 Route::get('/barbers/{barber}/availability', BarberAvailabilityController::class)

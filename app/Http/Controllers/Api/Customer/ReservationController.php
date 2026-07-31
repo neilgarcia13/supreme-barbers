@@ -10,6 +10,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\DB;
 
 class ReservationController extends Controller
 {
@@ -116,6 +117,54 @@ class ReservationController extends Controller
                 'last_name' => $reservation->barber->last_name,
                 'photo_path' => $reservation->barber->photo_path,
             ],
+            'cancelled_at' => $reservation->cancelled_at?->toIso8601String(),
         ];
+    }
+
+    public function cancel(
+        Request $request,
+        Reservation $reservation
+    ): JsonResponse {
+        abort_unless(
+            (int) $reservation->user_id === (int) $request->user()->id,
+            Response::HTTP_FORBIDDEN
+        );
+
+        return DB::transaction(function () use ($reservation): JsonResponse {
+            $reservation = Reservation::query()
+                ->lockForUpdate()
+                ->findOrFail($reservation->id);
+
+            if ($reservation->status === 'cancelled') {
+                return response()->json([
+                    'message' => 'This reservation has already been cancelled.',
+                ], Response::HTTP_CONFLICT);
+            }
+
+            $cancellationCutoff = $reservation->starts_at
+                ->copy()
+                ->subHour();
+
+            if (now()->gt($cancellationCutoff)) {
+                return response()->json([
+                    'message' => 'Reservations must be cancelled at least one hour before the appointment.',
+                ], Response::HTTP_CONFLICT);
+            }
+
+            $reservation->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'active_slot_key' => null,
+            ]);
+
+            $reservation->load(
+                'barber:id,first_name,last_name,photo_path'
+            );
+
+            return response()->json([
+                'message' => 'Reservation cancelled successfully.',
+                'reservation' => $this->reservationData($reservation),
+            ]);
+        });
     }
 }
