@@ -33,6 +33,7 @@ class ReservationController extends Controller
                 'ends_at',
                 'status',
                 'notes',
+                'cancelled_at',
             ])
             ->map(
                 fn(Reservation $reservation) =>
@@ -53,6 +54,7 @@ class ReservationController extends Controller
                 'ends_at',
                 'status',
                 'notes',
+                'cancelled_at',
             ])
             ->map(
                 fn(Reservation $reservation) =>

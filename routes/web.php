@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BarberController;
+use App\Http\Controllers\Customer\ReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\ReserveController;
@@ -24,6 +25,9 @@ Route::middleware(['auth', 'verified', 'customer'])->group(function () {
 
     Route::get('/reserve/{barber}', [ReserveController::class, 'create'])
         ->name('customer.reserve.create');
+
+    Route::get('/my-reservations', [ReservationController::class, 'index']
+        )->name('customer.reservations.index');
 });
 
 // Admin management pages
