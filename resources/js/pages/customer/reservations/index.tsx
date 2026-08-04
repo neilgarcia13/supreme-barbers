@@ -299,13 +299,4 @@ const Index = () => {
   );
 };
 
-Index.layout = {
-  breadcrumbs: [
-    {
-      title: 'My Reservations',
-      href: '/my-reservations',
-    },
-  ],
-};
-
 export default Index;
