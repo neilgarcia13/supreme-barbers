@@ -8,9 +8,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CalendarX2, LoaderCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 import { useEffect, useState } from 'react';
-import { apiRequest } from '@/lib/api';
+import { ApiError, apiRequest } from '@/lib/api';
+import { toast } from 'sonner';
 
 type ReservationBarber = {
   id: number;
@@ -32,6 +45,11 @@ type CustomerReservation = {
 type ReservationsResponse = {
   upcoming: CustomerReservation[];
   history: CustomerReservation[];
+};
+
+type CancelReservationResponse = {
+  message: string;
+  reservation: CustomerReservation;
 };
 
 const dateFormatter = new Intl.DateTimeFormat('en-PH', {
@@ -67,9 +85,13 @@ const getStatusLabel = (reservation: CustomerReservation) => {
 
 type ReservationCardProps = {
   reservation: CustomerReservation;
+  onCancelRequest?: (reservation: CustomerReservation) => void;
 };
 
-const ReservationCard = ({ reservation }: ReservationCardProps) => {
+const ReservationCard = ({
+  reservation,
+  onCancelRequest,
+}: ReservationCardProps) => {
   const startsAt = new Date(reservation.starts_at);
   const endsAt = new Date(reservation.ends_at);
   const statusLabel = getStatusLabel(reservation);
@@ -151,6 +173,21 @@ const ReservationCard = ({ reservation }: ReservationCardProps) => {
             )}
           </div>
         </div>
+
+        {onCancelRequest && (
+          <div className="flex justify-end border-t p-4 sm:px-5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className='cursor-pointer'
+              onClick={() => onCancelRequest(reservation)}
+            >
+              <CalendarX2 />
+              Cancel Reservation
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -162,6 +199,9 @@ const Index = () => {
   const [history, setHistory] = useState<CustomerReservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [reservationToCancel, setReservationToCancel] = useState<CustomerReservation | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -198,6 +238,49 @@ const Index = () => {
 
     return () => controller.abort();
   }, []);
+
+  const handleCancel = async () => {
+    if (!reservationToCancel || isCancelling) {
+      return;
+    }
+
+    setIsCancelling(true);
+
+    try {
+      const result = await apiRequest<CancelReservationResponse>(
+        `/api/reservations/${reservationToCancel.id}/cancel`,
+        {
+          method: 'PATCH',
+        },
+      );
+
+      setUpcoming((current) =>
+        current.filter(
+          (reservation) =>
+            reservation.id !== result.reservation.id,
+        ),
+      );
+
+      setHistory((current) =>
+        [...current, result.reservation].sort(
+          (first, second) =>
+            new Date(second.starts_at).getTime() -
+            new Date(first.starts_at).getTime(),
+        ),
+      );
+
+      toast.success(result.message);
+      setReservationToCancel(null);
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : 'Unable to cancel the reservation.',
+      );
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   return (
     <>
@@ -250,7 +333,7 @@ const Index = () => {
                 <div>
                   <h2 className="text-lg font-semibold">Upcoming ({upcoming.length})</h2>
                   <p className="text-sm text-muted-foreground">
-                    Reservations can be cancelled until one hour before the appointment.
+                    Reservations can be cancelled until one hour before the reservation.
                   </p>
                 </div>
               </div>
@@ -265,6 +348,7 @@ const Index = () => {
                     <ReservationCard
                       key={reservation.id}
                       reservation={reservation}
+                      onCancelRequest={setReservationToCancel}
                     />
                   ))}
                 </div>
@@ -293,6 +377,60 @@ const Index = () => {
             </section>
           </div>
         )}
+
+        <AlertDialog
+          open={reservationToCancel !== null}
+          onOpenChange={(open) => {
+            if (!open && !isCancelling) {
+              setReservationToCancel(null);
+            }
+          }}
+        >
+          {reservationToCancel && (
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Cancel this reservation?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Your reservation with{' '}
+                  {reservationToCancel.barber.first_name}{' '}
+                  {reservationToCancel.barber.last_name} on{' '}
+                  {dateFormatter.format(
+                    new Date(reservationToCancel.starts_at),
+                  )} will be cancelled and its time slot will become
+                  available again.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel 
+                  disabled={isCancelling}
+                  className='cursor-pointer'
+                >
+                  Keep Reservation
+                </AlertDialogCancel>
+
+                <AlertDialogAction
+                  variant='destructive'
+                  className='cursor-pointer'
+                  disabled={isCancelling}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void handleCancel();
+                  }}
+                >
+                  {isCancelling ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    <CalendarX2 />
+                  )}
+                  {isCancelling ? 'Cancelling...' : 'Cancel Reservation'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          )}
+        </AlertDialog>
 
       </section>
     </>
