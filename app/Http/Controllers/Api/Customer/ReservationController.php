@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\ReservationConfirmed;
 
 class ReservationController extends Controller
 {
@@ -96,6 +97,10 @@ class ReservationController extends Controller
 
         $reservation->load(
             'barber:id,first_name,last_name,photo_path'
+        );
+
+        $request->user()->notify(
+            new ReservationConfirmed($reservation)
         );
 
         return response()->json([

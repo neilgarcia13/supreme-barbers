@@ -5,6 +5,8 @@ use App\Models\Reservation;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
+use App\Notifications\ReservationConfirmed;
+use Illuminate\Support\Facades\Notification;
 
 function createCancellationTestReservation(
     User $customer,
@@ -307,4 +309,29 @@ it('allows another customer to reserve a cancelled appointment slot', function (
     expect($cancelledReservation->fresh()->active_slot_key)->toBeNull();
     expect($newReservation->active_slot_key)->toBe($releasedSlotKey);
     $this->assertDatabaseCount('reservations', 2);
+});
+
+it('does not send a confirmation notification when cancelled', function () {
+    Notification::fake();
+
+    $customer = User::factory()->create(['role' => 'customer']);
+    $barber = Barber::factory()->create();
+
+    $reservation = createCancellationTestReservation(
+        $customer,
+        $barber,
+        now()->addDay()->setTime(9, 0),
+    );
+
+    $this
+        ->actingAs($customer)
+        ->patchJson(
+            "/api/reservations/{$reservation->id}/cancel"
+        )
+        ->assertOk();
+
+    Notification::assertNotSentTo(
+        $customer,
+        ReservationConfirmed::class,
+    );
 });

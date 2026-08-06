@@ -2,6 +2,9 @@
 
 use App\Models\Barber;
 use App\Models\User;
+use App\Notifications\ReservationConfirmed;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Notification;
 
 it('allows a customer to create a confirmed reservation', function () {
     $customer = User::factory()->create([
@@ -142,11 +145,12 @@ it('rejects appointments outside operating hours', function (int $hour) {
 
     $this->assertDatabaseCount('reservations', 0);
 })->with([
-    'before opening' => 8,
-    'at closing time' => 21,
-]);
+            'before opening' => 8,
+            'at closing time' => 21,
+        ]);
 
 it('prevents two customers from reserving the same barber and time', function () {
+    Notification::fake();
     $firstCustomer = User::factory()->create(['role' => 'customer']);
     $secondCustomer = User::factory()->create(['role' => 'customer']);
     $barber = Barber::factory()->create();
@@ -172,6 +176,16 @@ it('prevents two customers from reserving the same barber and time', function ()
         );
 
     $this->assertDatabaseCount('reservations', 1);
+
+    Notification::assertSentTo(
+        $firstCustomer,
+        ReservationConfirmed::class,
+    );
+
+    Notification::assertNotSentTo(
+        $secondCustomer,
+        ReservationConfirmed::class,
+    );
 });
 
 it('rejects notes longer than one thousand characters', function () {
@@ -189,4 +203,34 @@ it('rejects notes longer than one thousand characters', function () {
         ->assertJsonValidationErrors('notes');
 
     $this->assertDatabaseCount('reservations', 0);
+});
+
+it('queues a confirmation notification after creating a reservation', function () {
+    Notification::fake();
+
+    $customer = User::factory()->create([
+        'role' => 'customer',
+    ]);
+
+    $barber = Barber::factory()->create();
+    $startsAt = now()->addDay()->setTime(9, 0);
+
+    $this
+        ->actingAs($customer)
+        ->postJson(route('api.reservations.store'), [
+            'barber_id' => $barber->id,
+            'starts_at' => $startsAt->toIso8601String(),
+        ])
+        ->assertCreated();
+
+    Notification::assertSentTo(
+        $customer,
+        ReservationConfirmed::class,
+        function (ReservationConfirmed $notification, array $channels, ) use ($customer, $barber): bool {
+            return $notification instanceof ShouldQueue
+                && $channels === ['mail']
+                && $notification->reservation->user_id === $customer->id
+                && $notification->reservation->barber_id === $barber->id;
+        },
+    );
 });
