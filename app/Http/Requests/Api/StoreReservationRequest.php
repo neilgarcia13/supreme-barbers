@@ -4,9 +4,8 @@ namespace App\Http\Requests\Api;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreReservationRequest extends FormRequest
@@ -35,7 +34,7 @@ class StoreReservationRequest extends FormRequest
             'starts_at' => [
                 'required',
                 'date',
-                'after:now'
+                'after:now',
             ],
             'notes' => [
                 'nullable',
@@ -54,7 +53,21 @@ class StoreReservationRequest extends FormRequest
                 }
 
                 $startsAt = Carbon::parse($this->input('starts_at'))
-                ->setTimezone(config('app.timezone'));
+                    ->setTimezone(config('app.timezone'));
+
+                $advanceBookingDays = (int) config('reservations.advance_booking_days');
+
+                $latestAllowedDate = now(config('app.timezone'))
+                    ->startOfDay()
+                    ->addDays($advanceBookingDays)
+                    ->endOfDay();
+
+                if ($startsAt->gt($latestAllowedDate)) {
+                    $validator->errors()->add(
+                        'starts_at',
+                        "Reservations can only be made up to {$advanceBookingDays} days in advance."
+                    );
+                }
 
                 if ($startsAt->minute !== 0 || $startsAt->second !== 0) {
                     $validator->errors()->add(

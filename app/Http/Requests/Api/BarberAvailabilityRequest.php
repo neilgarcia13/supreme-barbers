@@ -27,7 +27,19 @@ class BarberAvailabilityRequest extends FormRequest
                 'required',
                 'date_format:Y-m-d',
                 'after_or_equal:today',
-            ]
+                'before_or_equal:'.now(config('app.timezone'))
+                    ->addDays((int) config('reservations.advance_booking_days'))
+                    ->toDateString(),
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        $days = (int) config('reservations.advance_booking_days');
+
+        return [
+            'date.before_or_equal' => "Availability can only be viewed up to {$days} days in advance.",
         ];
     }
 }

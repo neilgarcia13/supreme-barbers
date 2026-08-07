@@ -25,6 +25,12 @@ class ReserveController extends Controller
                 'last_name',
                 'photo_path',
             ]),
+            'max_reservation_date' => now(config('app.timezone'))
+                ->startOfDay()
+                ->addDays(
+                    (int) config('reservations.advance_booking_days')
+                )
+                ->toDateString(),
         ]);
     }
 }

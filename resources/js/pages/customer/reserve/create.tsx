@@ -30,6 +30,7 @@ type Barber = {
 
 type Props = {
   barber: Barber;
+  max_reservation_date: string;
 };
 
 type SlotStatus = 'available' | 'reserved' | 'unavailable';
@@ -63,6 +64,17 @@ type CreateReservationResponse = {
 
 const SHOP_TIME_ZONE = 'Asia/Manila';
 
+const parseShopDate = (date: string) => {
+  const [year, month, day] = date.split('-').map(Number);
+
+  return new TZDate(
+    year,
+    month - 1,
+    day,
+    SHOP_TIME_ZONE,
+  );
+};
+
 const slotTimeFormatter = new Intl.DateTimeFormat('en-US', {
   hour: 'numeric',
   minute: '2-digit',
@@ -75,9 +87,12 @@ const slotStatusLabels: Record<SlotStatus, string> = {
   unavailable: 'Unavailable',
 };
 
-const Create = ({ barber }: Props) => {
+const Create = ({ barber, max_reservation_date }: Props) => {
   const fullName = `${barber.first_name} ${barber.last_name}`;
   const today = TZDate.tz(SHOP_TIME_ZONE);
+  const maxReservationDate = parseShopDate(
+    max_reservation_date,
+  );
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(() =>
     TZDate.tz(SHOP_TIME_ZONE),
@@ -328,11 +343,21 @@ const Create = ({ barber }: Props) => {
                 </h2>
               </div>
 
+              <p className="text-sm text-muted-foreground">
+                Reservations are available through{' '}
+                {format(maxReservationDate, 'MMMM d, yyyy')}.
+              </p>
+
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={handleDateSelect}
-                disabled={{ before: today }}
+                disabled={[
+                  { before: today },
+                  { after: maxReservationDate },
+                ]}
+                startMonth={today}
+                endMonth={maxReservationDate}
                 timeZone={SHOP_TIME_ZONE}
                 className="w-full rounded-lg border [--cell-size:--spacing(10)]"
               />

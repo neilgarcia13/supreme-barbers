@@ -4,6 +4,7 @@ use App\Models\Barber;
 use App\Models\User;
 use App\Notifications\ReservationConfirmed;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
 
 it('allows a customer to create a confirmed reservation', function () {
@@ -145,9 +146,9 @@ it('rejects appointments outside operating hours', function (int $hour) {
 
     $this->assertDatabaseCount('reservations', 0);
 })->with([
-            'before opening' => 8,
-            'at closing time' => 21,
-        ]);
+    'before opening' => 8,
+    'at closing time' => 21,
+]);
 
 it('prevents two customers from reserving the same barber and time', function () {
     Notification::fake();
@@ -226,11 +227,52 @@ it('queues a confirmation notification after creating a reservation', function (
     Notification::assertSentTo(
         $customer,
         ReservationConfirmed::class,
-        function (ReservationConfirmed $notification, array $channels, ) use ($customer, $barber): bool {
+        function (ReservationConfirmed $notification, array $channels) use ($customer, $barber): bool {
             return $notification instanceof ShouldQueue
                 && $channels === ['mail']
                 && $notification->reservation->user_id === $customer->id
                 && $notification->reservation->barber_id === $barber->id;
         },
     );
+});
+
+it('allows reservations exactly thirty days ahead', function () {
+    $this->travelTo(
+        Carbon::create(2026, 8, 7, 8, 0, 0, 'Asia/Manila')
+    );
+
+    Notification::fake();
+
+    $customer = User::factory()->create(['role' => 'customer']);
+    $barber = Barber::factory()->create();
+    $startsAt = now()->addDays(30)->setTime(9, 0);
+
+    $this
+        ->actingAs($customer)
+        ->postJson(route('api.reservations.store'), [
+            'barber_id' => $barber->id,
+            'starts_at' => $startsAt->toIso8601String(),
+        ])
+        ->assertCreated();
+});
+
+it('rejects reservations more than thirty days ahead', function () {
+    $this->travelTo(
+        Carbon::create(2026, 8, 7, 8, 0, 0, 'Asia/Manila')
+    );
+
+    $customer = User::factory()->create(['role' => 'customer']);
+    $barber = Barber::factory()->create();
+    $startsAt = now()->addDays(31)->setTime(9, 0);
+
+    $this
+        ->actingAs($customer)
+        ->postJson(route('api.reservations.store'), [
+            'barber_id' => $barber->id,
+            'starts_at' => $startsAt->toIso8601String(),
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
+
+    $this->assertDatabaseCount('reservations', 0);
 });

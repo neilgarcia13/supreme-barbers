@@ -118,7 +118,7 @@ it('does not mark cancelled reservations as reserved', function () {
     $this
         ->getJson(
             "/api/barbers/{$barber->id}/availability"
-            . "?date={$date->toDateString()}"
+            ."?date={$date->toDateString()}"
         )
         ->assertOk()
         ->assertJsonPath('slots.1.status', 'available');
@@ -140,4 +140,35 @@ it('marks elapsed appointment slots as unavailable for today', function () {
         ->assertJsonPath('slots.0.status', 'unavailable')
         ->assertJsonPath('slots.4.status', 'unavailable')
         ->assertJsonPath('slots.5.status', 'available');
+});
+
+it('allows availability exactly thirty days ahead', function () {
+    $this->travelTo(
+        Carbon::create(2026, 8, 7, 8, 0, 0, 'Asia/Manila')
+    );
+
+    $barber = Barber::factory()->create();
+    $date = now()->addDays(30)->toDateString();
+
+    $this
+        ->getJson(
+            "/api/barbers/{$barber->id}/availability?date={$date}"
+        )
+        ->assertOk();
+});
+
+it('rejects availability more than thirty days ahead', function () {
+    $this->travelTo(
+        Carbon::create(2026, 8, 7, 8, 0, 0, 'Asia/Manila')
+    );
+
+    $barber = Barber::factory()->create();
+    $date = now()->addDays(31)->toDateString();
+
+    $this
+        ->getJson(
+            "/api/barbers/{$barber->id}/availability?date={$date}"
+        )
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('date');
 });
