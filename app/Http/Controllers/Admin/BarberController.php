@@ -16,7 +16,13 @@ class BarberController extends Controller
      */
     public function index()
     {
-        $barbers = Barber::query()->latest()->get();
+        $barbers = Barber::query()
+            ->latest()
+            ->get()
+            ->map(
+                fn(Barber $barber): array =>
+                $this->barberData($barber)
+            );
 
         return Inertia::render('admin/barbers/index', [
             'barbers' => $barbers,
@@ -61,7 +67,7 @@ class BarberController extends Controller
     public function edit(Barber $barber)
     {
         return Inertia::render('admin/barbers/edit', [
-            'barber' => $barber,
+            'barber' => $this->barberData($barber),
         ]);
     }
 
@@ -101,5 +107,17 @@ class BarberController extends Controller
         $barber->delete();
 
         return redirect()->route('admin.barbers.index');
+    }
+
+    private function barberData(Barber $barber): array
+    {
+        return [
+            'id' => $barber->id,
+            'first_name' => $barber->first_name,
+            'last_name' => $barber->last_name,
+            'birthdate' => $barber->birthdate->toDateString(),
+            'photo_path' => $barber->photo_path,
+            'is_active' => $barber->is_active,
+        ];
     }
 }

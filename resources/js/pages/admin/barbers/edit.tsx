@@ -26,7 +26,7 @@ const Edit = ({ barber }: EditProps) => {
     _method: 'put',
     first_name: barber.first_name,
     last_name: barber.last_name,
-    birthdate: barber.birthdate.slice(0, 10),
+    birthdate: barber.birthdate,
     photo_path: null as File | null,
     is_active: barber.is_active,
   });
