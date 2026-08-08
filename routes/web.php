@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BarberController;
+use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
 use App\Http\Controllers\Customer\ReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,8 +27,10 @@ Route::middleware(['auth', 'verified', 'customer'])->group(function () {
     Route::get('/reserve/{barber}', [ReserveController::class, 'create'])
         ->name('customer.reserve.create');
 
-    Route::get('/my-reservations', [ReservationController::class, 'index']
-        )->name('customer.reservations.index');
+    Route::get(
+        '/my-reservations',
+        [ReservationController::class, 'index']
+    )->name('customer.reservations.index');
 });
 
 // Admin management pages
@@ -51,6 +54,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/admin/barbers/{barber}/edit', [BarberController::class, 'edit'])
         ->name('admin.barbers.edit');
+
+    Route::get('/admin/reservations', [AdminReservationController::class, 'index'])
+        ->name('admin.reservations.index');
 });
 
 // Account settings routes
