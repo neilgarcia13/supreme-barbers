@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Customer\BarberIndexController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\Customer\BarberAvailabilityController;
+use App\Http\Controllers\Api\Admin\ReservationIndexController;
 
 Route::middleware(['auth:sanctum', 'customer'])->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index'])
@@ -24,3 +25,7 @@ Route::get('/barbers/{barber}/availability', BarberAvailabilityController::class
 
 Route::get('/barbers', BarberIndexController::class)
     ->name('api.barbers.index');
+
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('api.admin.')->group(function () {
+    Route::get('/reservations',ReservationIndexController::class)->name('reservations.index');
+});
