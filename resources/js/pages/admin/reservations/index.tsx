@@ -38,25 +38,52 @@ type ReservationsResponse = {
   reservations: AdminReservation[];
 };
 
+type StatusFilter = 'all' | 'confirmed' | 'cancelled';
+
 const Index = (_props: Props) => {
   const [reservations, setReservations] = useState<AdminReservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  //Filter states
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [date, setDate] = useState('');
+  const [barberId, setBarberId] = useState('all');
+  const [status, setStatus] = useState<StatusFilter>('all');
+
   useEffect(() => {
     const controller = new AbortController();
+
+    const parameters = new URLSearchParams();
+
+    if (search) {
+      parameters.set('search', search);
+    }
+
+    if (date) {
+      parameters.set('date', date);
+    }
+
+    if (barberId !== 'all') {
+      parameters.set('barber_id', barberId);
+    }
+
+    if (status !== 'all') {
+      parameters.set('status', status);
+    }
+
+    const query = parameters.toString();
+    const url = `/api/admin/reservations${query ? `?${query}` : ''}`;
 
     const fetchReservations = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await apiRequest<ReservationsResponse>(
-          '/api/admin/reservations',
-          {
-            signal: controller.signal,
-          },
-        );
+        const response = await apiRequest<ReservationsResponse>(url, {
+          signal: controller.signal,
+        });
 
         setReservations(response.reservations);
       } catch (error) {
@@ -79,7 +106,8 @@ const Index = (_props: Props) => {
     void fetchReservations();
 
     return () => controller.abort();
-  }, []);
+  }, [search, date, barberId, status]);
+
   return (
     <>
       <Head title="Reservations" />
