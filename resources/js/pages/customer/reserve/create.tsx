@@ -213,7 +213,7 @@ const Create = ({ barber, max_reservation_date }: Props) => {
     }
 
     if (!selectedStartsAt) {
-      setSubmissionError('Select an available appointment time.');
+      setSubmissionError('Select an available reservation time.');
 
       return;
     }
@@ -297,7 +297,7 @@ const Create = ({ barber, max_reservation_date }: Props) => {
             Reserve with {fullName}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Choose a date and an available one-hour appointment
+            Choose a date and an available one-hour reservation
             time.
           </p>
         </header>
@@ -436,7 +436,7 @@ const Create = ({ barber, max_reservation_date }: Props) => {
                 <div className="flex min-h-64 items-center justify-center rounded-lg border border-dashed p-8 text-center">
                   <p className="text-sm text-muted-foreground">
                     Select a date to see available
-                    appointment times.
+                    reservation times.
                   </p>
                 </div>
               )}
@@ -513,7 +513,7 @@ const Create = ({ barber, max_reservation_date }: Props) => {
               slots.length === 0 && (
                 <div className="flex min-h-64 items-center justify-center rounded-lg border border-dashed p-8 text-center">
                   <p className="text-sm text-muted-foreground">
-                    No appointment times are available for
+                    No reservation times are available for
                     this date.
                   </p>
                 </div>
