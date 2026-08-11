@@ -1,19 +1,30 @@
 import { Head } from '@inertiajs/react';
+import { Search, UserRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ApiError, apiRequest } from '@/lib/api';
 
-import { Search, X } from 'lucide-react';
-
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { ApiError, apiRequest } from '@/lib/api';
 
 type Barber = {
   id: number;
@@ -52,6 +63,49 @@ type ReservationsResponse = {
 };
 
 type StatusFilter = 'all' | 'confirmed' | 'cancelled';
+
+const dateFormatter = new Intl.DateTimeFormat('en-PH', {
+  timeZone: 'Asia/Manila',
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+const timeFormatter = new Intl.DateTimeFormat('en-PH', {
+  timeZone: 'Asia/Manila',
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+});
+
+type DisplayStatus =
+  | 'Confirmed'
+  | 'In progress'
+  | 'Completed'
+  | 'Cancelled';
+
+const getDisplayStatus = (
+  reservation: AdminReservation,
+): DisplayStatus => {
+  if (reservation.status === 'cancelled') {
+    return 'Cancelled';
+  }
+
+  const now = Date.now();
+  const startsAt = new Date(reservation.starts_at).getTime();
+  const endsAt = new Date(reservation.ends_at).getTime();
+
+  if (startsAt > now) {
+    return 'Confirmed';
+  }
+
+  if (endsAt > now) {
+    return 'In progress';
+  }
+
+  return 'Completed';
+};
 
 const Index = ({ barbers }: Props) => {
   const [reservations, setReservations] = useState<AdminReservation[]>([]);
@@ -171,7 +225,7 @@ const Index = ({ barbers }: Props) => {
               />
               <Button
                 type="submit"
-                variant="ghost"
+                variant="link"
                 size="icon"
                 className="absolute top-1/2 right-1 -translate-y-1/2"
                 aria-label="Search reservations"
@@ -238,24 +292,180 @@ const Index = ({ barbers }: Props) => {
             disabled={!hasFilters}
             onClick={clearFilters}
           >
-            <X />
-            Clear
+            Clear filters
           </Button>
         </div>
 
-        {isLoading && <p className="text-sm text-muted-foreground">Loading reservations...</p>}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold">Reservation Records</h2>
 
-        {error && (
-          <p className="text-sm text-destructive">
-            {error}
-          </p>
-        )}
+            {!isLoading && !error && (
+              <p className="text-sm text-muted-foreground">
+                {reservations.length}{' '}
+                {reservations.length === 1
+                  ? 'reservation'
+                  : 'reservations'}
+              </p>
+            )}
+          </div>
 
-        {!isLoading && !error && (
-          <p className="text-sm text-muted-foreground">
-            {reservations.length} reservations
-          </p>
-        )}
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
+
+          <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-x-auto">
+              <Table className="min-w-180">
+                <TableCaption className="sr-only">
+                  Customer reservation records
+                </TableCaption>
+
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-52">
+                      Date and time
+                    </TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Barber</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="hidden xl:table-cell">
+                      Notes
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {isLoading &&
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Skeleton className="h-9 w-36" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-9 w-40" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-9 w-32" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-6 w-20" />
+                        </TableCell>
+                        <TableCell className="hidden xl:table-cell">
+                          <Skeleton className="h-9 w-44" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                  {!isLoading &&
+                    !error &&
+                    reservations.map((reservation) => {
+                      const startsAt = new Date(
+                        reservation.starts_at,
+                      );
+                      const endsAt = new Date(
+                        reservation.ends_at,
+                      );
+                      const displayStatus =
+                        getDisplayStatus(reservation);
+                      const barberName =
+                        `${reservation.barber.first_name} ${reservation.barber.last_name}`;
+
+                      return (
+                        <TableRow key={reservation.id}>
+                          <TableCell>
+                            <p className="font-medium">
+                              {dateFormatter.format(startsAt)}
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {timeFormatter.format(startsAt)}
+                              {' - '}
+                              {timeFormatter.format(endsAt)}
+                            </p>
+                          </TableCell>
+
+                          <TableCell>
+                            <p className="font-medium">
+                              {reservation.customer.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {reservation.customer.email}
+                            </p>
+                          </TableCell>
+
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="size-9 rounded-md">
+                                {reservation.barber
+                                  .photo_path && (
+                                    <AvatarImage
+                                      src={`/storage/${reservation.barber.photo_path}`}
+                                      alt={barberName}
+                                      className="object-cover"
+                                    />
+                                  )}
+                                <AvatarFallback className="rounded-md">
+                                  <UserRound className="size-4" />
+                                </AvatarFallback>
+                              </Avatar>
+
+                              <span className="font-medium">
+                                {barberName}
+                              </span>
+                            </div>
+                          </TableCell>
+
+                          <TableCell>
+                            <Badge
+                              variant={
+                                displayStatus === 'Cancelled'
+                                  ? 'destructive'
+                                  : displayStatus ===
+                                    'Confirmed'
+                                    ? 'default'
+                                    : 'secondary'
+                              }
+                            >
+                              {displayStatus}
+                            </Badge>
+                          </TableCell>
+
+                          <TableCell className="hidden max-w-64 xl:table-cell">
+                            <p className="line-clamp-2 text-sm text-muted-foreground">
+                              {reservation.notes ??
+                                'No notes'}
+                            </p>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+
+                  {!isLoading &&
+                    !error &&
+                    reservations.length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          className="h-56 text-center"
+                        >
+                          <div className="flex flex-col items-center">
+                            <p className="mt-3 text-lg font-medium">
+                              No reservations found
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              Try adjusting the current filters.
+                            </p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </div>
       </section>
     </>
   );
