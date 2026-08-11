@@ -6,6 +6,7 @@ use App\Http\Controllers\Customer\ReservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\ReserveController;
+use App\Http\Controllers\Admin\BarberScheduleController;
 
 // Public routes
 Route::inertia('/', 'welcome')->name('home');
@@ -57,6 +58,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/admin/reservations', [AdminReservationController::class, 'index'])
         ->name('admin.reservations.index');
+
+    Route::get('/admin/schedules', BarberScheduleController::class)
+        ->name('admin.schedules.index');
 });
 
 // Account settings routes

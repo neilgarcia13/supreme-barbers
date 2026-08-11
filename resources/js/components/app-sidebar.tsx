@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import {
     BookOpen,
+    CalendarClock,
     CalendarDays,
     FolderGit2,
     LayoutGrid,
@@ -29,14 +30,19 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Barbers',
+        href: '/admin/barbers',
+        icon: UsersRound,
+    },
+    {
         title: 'Reservations',
         href: '/admin/reservations',
         icon: CalendarDays,
     },
     {
-        title: 'Barbers',
-        href: '/admin/barbers',
-        icon: UsersRound,
+        title: 'Daily Schedule',
+        href: '/admin/schedules',
+        icon: CalendarClock,
     },
 ];
 
