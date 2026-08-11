@@ -2,6 +2,19 @@ import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { ApiError, apiRequest } from '@/lib/api';
 
+import { Search, X } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
 type Barber = {
   id: number;
   first_name: string;
@@ -40,7 +53,7 @@ type ReservationsResponse = {
 
 type StatusFilter = 'all' | 'confirmed' | 'cancelled';
 
-const Index = (_props: Props) => {
+const Index = ({ barbers }: Props) => {
   const [reservations, setReservations] = useState<AdminReservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +64,21 @@ const Index = (_props: Props) => {
   const [date, setDate] = useState('');
   const [barberId, setBarberId] = useState('all');
   const [status, setStatus] = useState<StatusFilter>('all');
+
+  const hasFilters =
+    searchInput.trim() !== '' ||
+    search !== '' ||
+    date !== '' ||
+    barberId !== 'all' ||
+    status !== 'all';
+
+  const clearFilters = () => {
+    setSearchInput('');
+    setSearch('');
+    setDate('');
+    setBarberId('all');
+    setStatus('all');
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -121,6 +149,99 @@ const Index = (_props: Props) => {
             View and manage customer reservations.
           </p>
         </header>
+
+        <div className="grid gap-4 rounded-lg border p-4 lg:grid-cols-[minmax(14rem,1fr)_12rem_14rem_12rem_auto] lg:items-end">
+          <form
+            className="space-y-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setSearch(searchInput.trim());
+            }}
+          >
+            <Label htmlFor="reservation-search">Customer</Label>
+            <div className="relative">
+              <Input
+                id="reservation-search"
+                value={searchInput}
+                placeholder="Search name or email"
+                className="pr-10"
+                onChange={(event) =>
+                  setSearchInput(event.target.value)
+                }
+              />
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon"
+                className="absolute top-1/2 right-1 -translate-y-1/2"
+                aria-label="Search reservations"
+              >
+                <Search />
+              </Button>
+            </div>
+          </form>
+
+          <div className="space-y-2">
+            <Label htmlFor="reservation-date">Date</Label>
+            <Input
+              id="reservation-date"
+              type="date"
+              value={date}
+              onChange={(event) => setDate(event.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Barber</Label>
+            <Select value={barberId} onValueChange={setBarberId}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All barbers</SelectItem>
+
+                {barbers.map((barber) => (
+                  <SelectItem
+                    key={barber.id}
+                    value={String(barber.id)}
+                  >
+                    {barber.first_name} {barber.last_name}
+                    {!barber.is_active && ' (Inactive)'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Status</Label>
+            <Select
+              value={status}
+              onValueChange={(value: StatusFilter) =>
+                setStatus(value)
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!hasFilters}
+            onClick={clearFilters}
+          >
+            <X />
+            Clear
+          </Button>
+        </div>
 
         {isLoading && <p className="text-sm text-muted-foreground">Loading reservations...</p>}
 
