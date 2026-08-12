@@ -4,6 +4,8 @@ import {
   CalendarDays,
   Clock3,
   Menu,
+  Moon,
+  Sun,
   Timer,
   UserRound,
 } from 'lucide-react';
@@ -30,6 +32,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAppearance } from '@/hooks/use-appearance';
 import { dashboard, home, login, register } from '@/routes';
 
 type Barber = {
@@ -71,6 +74,7 @@ const reservationSteps = [
 
 const Landing = () => {
   const { auth } = usePage().props;
+  const { resolvedAppearance, updateAppearance } = useAppearance();
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +84,12 @@ const Landing = () => {
     auth.user?.role === 'admin'
       ? 'Open Admin Dashboard'
       : 'Reserve Your Barber';
+  const isDark = resolvedAppearance === 'dark';
+  const themeLabel = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+
+  const toggleTheme = () => {
+    updateAppearance(isDark ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -176,6 +186,19 @@ const Landing = () => {
                   </Button>
                 </>
               )}
+
+              <div className='ml-4'>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleTheme}
+                  aria-label={themeLabel}
+                  title={themeLabel}
+                >
+                  {isDark ? <Sun /> : <Moon />}
+                </Button>
+              </div>
             </div>
 
             <Sheet>
@@ -212,6 +235,15 @@ const Landing = () => {
                 </nav>
 
                 <div className="mt-auto grid gap-2 px-4 pb-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={toggleTheme}
+                  >
+                    {isDark ? <Sun /> : <Moon />}
+                    {themeLabel}
+                  </Button>
+
                   {auth.user ? (
                     <Button asChild>
                       <Link href={dashboard()}>
@@ -259,7 +291,7 @@ const Landing = () => {
                     className="size-10 shrink-0 object-contain"
                   />
                   <p className="text-sm font-semibold">
-                  Supreme Barbers
+                    Supreme Barbers
                   </p>
                 </div>
 
