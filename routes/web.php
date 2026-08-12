@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\ReserveController;
 use App\Http\Controllers\Admin\BarberScheduleController;
 
-// Public routes
-Route::inertia('/', 'welcome')->name('home');
+// Public landing page route
+Route::inertia('/', 'landing')->name('home');
 
 // Shared post-login redirect
 Route::get('/dashboard', function (Request $request) {
