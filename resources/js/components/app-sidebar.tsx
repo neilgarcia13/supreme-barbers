@@ -4,11 +4,9 @@ import {
     CalendarClock,
     CalendarDays,
     FolderGit2,
-    LayoutGrid,
     UsersRound,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -25,37 +23,19 @@ import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: '/admin/dashboard',
-        icon: LayoutGrid,
-    },
-    {
         title: 'Barbers',
         href: '/admin/barbers',
         icon: UsersRound,
-    },
-    {
-        title: 'Reservations',
-        href: '/admin/reservations',
-        icon: CalendarDays,
     },
     {
         title: 'Daily Schedule',
         href: '/admin/schedules',
         icon: CalendarClock,
     },
-];
-
-const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        title: 'Reservations',
+        href: '/admin/reservations',
+        icon: CalendarDays,
     },
 ];
 
@@ -79,7 +59,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

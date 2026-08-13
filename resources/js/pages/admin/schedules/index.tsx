@@ -1,18 +1,23 @@
 import { Head, Link } from '@inertiajs/react';
+import { toPng } from 'html-to-image';
 import {
     CalendarClock,
     Clock3,
     Download,
-    LoaderCircle,
     RefreshCw,
     StickyNote,
     UserRound,
     UsersRound,
 } from 'lucide-react';
-import { toPng } from 'html-to-image';
-import { toast } from 'sonner';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
+import DailyScheduleExport from '@/components/admin/daily-schedule-export';
+import type {
+    ScheduleBarber,
+    ScheduleReservation,
+    ScheduleSlot,
+} from '@/components/admin/daily-schedule-export';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,11 +31,6 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError, apiRequest } from '@/lib/api';
-import DailyScheduleExport, {
-    type ScheduleBarber,
-    type ScheduleReservation,
-    type ScheduleSlot,
-} from '@/components/admin/daily-schedule-export';
 
 type Props = {
     today: string;
@@ -208,14 +208,12 @@ const Index = ({ today, barbers }: Props) => {
                 `${selectedBarber.first_name}-${selectedBarber.last_name}`
                     .toLowerCase()
                     .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-|-$/g, '') ||
-                `barber-${selectedBarber.id}`;
+                    .replace(/^-|-$/g, '') || `barber-${selectedBarber.id}`;
 
             const downloadLink = document.createElement('a');
 
             downloadLink.href = dataUrl;
-            downloadLink.download =
-                `${barberSlug}-${date}-daily-schedule.png`;
+            downloadLink.download = `${barberSlug}-${date}-daily-schedule.png`;
 
             downloadLink.click();
 
@@ -292,17 +290,21 @@ const Index = ({ today, barbers }: Props) => {
                             variant="outline"
                             className="flex-1 md:flex-none"
                             disabled={!date || !barberId || isLoading}
-                            onClick={() => setRefreshKey((current) => current + 1)}
+                            onClick={() =>
+                                setRefreshKey((current) => current + 1)
+                            }
                         >
                             <RefreshCw
-                                className={isLoading ? 'animate-spin' : undefined}
+                                className={
+                                    isLoading ? 'animate-spin' : undefined
+                                }
                             />
                             Refresh
                         </Button>
 
                         <Button
                             type="button"
-                            className="flex-1 md:flex-none cursor-pointer"
+                            className="flex-1 cursor-pointer md:flex-none"
                             disabled={
                                 !selectedBarber ||
                                 !selectedDate ||

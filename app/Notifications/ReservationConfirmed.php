@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -17,8 +18,7 @@ class ReservationConfirmed extends Notification implements ShouldQueue
      */
     public function __construct(
         public Reservation $reservation,
-    ) {
-    }
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -32,6 +32,8 @@ class ReservationConfirmed extends Notification implements ShouldQueue
 
     /**
      * Get the mail representation of the notification.
+     *
+     * @param  User  $notifiable
      */
     public function toMail(object $notifiable): MailMessage
     {

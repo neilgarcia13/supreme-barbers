@@ -27,9 +27,7 @@ function readCookie(name: string): string | null {
         .split('; ')
         .find((entry) => entry.startsWith(prefix));
 
-    return cookie
-        ? decodeURIComponent(cookie.slice(prefix.length))
-        : null;
+    return cookie ? decodeURIComponent(cookie.slice(prefix.length)) : null;
 }
 
 async function ensureCsrfCookie(): Promise<void> {
@@ -102,15 +100,10 @@ export async function apiRequest<T>(
         .get('content-type')
         ?.includes('application/json');
 
-    const payload = isJsonResponse
-        ? await response.json()
-        : null;
+    const payload = isJsonResponse ? await response.json() : null;
 
     if (!response.ok) {
-        throw new ApiError(
-            response.status,
-            (payload ?? {}) as ApiErrorPayload,
-        );
+        throw new ApiError(response.status, (payload ?? {}) as ApiErrorPayload);
     }
 
     return payload as T;

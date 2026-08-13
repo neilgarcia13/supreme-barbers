@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,7 +18,7 @@ class AdminUserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'password' => Hash::make('SupremeBarbers2026!'),
-                'role' => 'admin'
+                'role' => 'admin',
             ]
         );
     }

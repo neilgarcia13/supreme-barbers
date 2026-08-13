@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Admin\IndexReservationRequest;
 use App\Models\Reservation;
 use Illuminate\Http\JsonResponse;
-
-use App\Http\Requests\Api\Admin\IndexReservationRequest;
 
 class ReservationIndexController extends Controller
 {
@@ -21,21 +20,21 @@ class ReservationIndexController extends Controller
             ])
             ->when(
                 isset($validated['date']),
-                fn($query) => $query->whereDate(
+                fn ($query) => $query->whereDate(
                     'starts_at',
                     $validated['date']
                 )
             )
             ->when(
                 isset($validated['barber_id']),
-                fn($query) => $query->where(
+                fn ($query) => $query->where(
                     'barber_id',
                     $validated['barber_id']
                 )
             )
             ->when(
                 isset($validated['status']),
-                fn($query) => $query->where(
+                fn ($query) => $query->where(
                     'status',
                     $validated['status']
                 )
@@ -65,14 +64,13 @@ class ReservationIndexController extends Controller
                 'notes',
                 'cancelled_at',
             ])
-            ->map(fn(Reservation $reservation) => [
+            ->map(fn (Reservation $reservation) => [
                 'id' => $reservation->id,
                 'starts_at' => $reservation->starts_at->toIso8601String(),
                 'ends_at' => $reservation->ends_at->toIso8601String(),
                 'status' => $reservation->status,
                 'notes' => $reservation->notes,
-                'cancelled_at' =>
-                    $reservation->cancelled_at?->toIso8601String(),
+                'cancelled_at' => $reservation->cancelled_at?->toIso8601String(),
                 'customer' => [
                     'id' => $reservation->user->id,
                     'name' => $reservation->user->name,

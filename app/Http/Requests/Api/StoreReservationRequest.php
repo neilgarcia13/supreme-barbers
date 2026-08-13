@@ -44,6 +44,9 @@ class StoreReservationRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<callable(Validator): void>
+     */
     public function after(): array
     {
         return [

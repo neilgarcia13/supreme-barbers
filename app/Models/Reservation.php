@@ -2,10 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $barber_id
+ * @property Carbon $starts_at
+ * @property Carbon $ends_at
+ * @property string|null $notes
+ * @property string $status
+ * @property string|null $active_slot_key
+ * @property Carbon|null $cancelled_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User $user
+ * @property-read Barber $barber
+ */
 class Reservation extends Model
 {
     protected $fillable = [
@@ -32,11 +48,17 @@ class Reservation extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Barber, $this>
+     */
     public function barber(): BelongsTo
     {
         return $this->belongsTo(Barber::class);

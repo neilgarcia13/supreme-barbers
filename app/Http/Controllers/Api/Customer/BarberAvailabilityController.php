@@ -19,7 +19,7 @@ class BarberAvailabilityController extends Controller
         BarberAvailabilityRequest $request,
         Barber $barber
     ): JsonResponse {
-        if (!$barber->is_active) {
+        if (! $barber->is_active) {
             return response()->json([
                 'message' => 'Barber not found.',
             ], Response::HTTP_NOT_FOUND);
@@ -39,8 +39,7 @@ class BarberAvailabilityController extends Controller
             ])
             ->get(['starts_at'])
             ->map(
-                fn(Reservation $reservation) =>
-                $reservation->starts_at->format('H:i:s')
+                fn (Reservation $reservation) => $reservation->starts_at->format('H:i:s')
             )
             ->all();
 

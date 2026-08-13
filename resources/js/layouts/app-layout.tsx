@@ -1,12 +1,9 @@
-import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
-import CustomerLayout from './customer/customer-layout';
-import type { AppLayoutProps } from '@/types';
 import { usePage } from '@inertiajs/react';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
+import type { AppLayoutProps } from '@/types';
+import CustomerLayout from './customer/customer-layout';
 
-export default function AppLayout({
-    children,
-    breadcrumbs,
-}: AppLayoutProps) {
+export default function AppLayout({ children, breadcrumbs }: AppLayoutProps) {
     const { auth } = usePage().props;
 
     if (auth.user.role === 'customer') {

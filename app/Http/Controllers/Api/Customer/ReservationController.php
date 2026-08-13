@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api\Customer;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreReservationRequest;
 use App\Models\Reservation;
+use App\Notifications\ReservationConfirmed;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
-use App\Notifications\ReservationConfirmed;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReservationController extends Controller
 {
@@ -37,8 +37,7 @@ class ReservationController extends Controller
                 'cancelled_at',
             ])
             ->map(
-                fn(Reservation $reservation) =>
-                $this->reservationData($reservation)
+                fn (Reservation $reservation) => $this->reservationData($reservation)
             );
 
         $history = (clone $baseQuery)
@@ -58,8 +57,7 @@ class ReservationController extends Controller
                 'cancelled_at',
             ])
             ->map(
-                fn(Reservation $reservation) =>
-                $this->reservationData($reservation)
+                fn (Reservation $reservation) => $this->reservationData($reservation)
             );
 
         return response()->json([
@@ -110,6 +108,22 @@ class ReservationController extends Controller
 
     }
 
+    /**
+     * @return array{
+     *     id: int,
+     *     starts_at: string,
+     *     ends_at: string,
+     *     status: string,
+     *     notes: string|null,
+     *     barber: array{
+     *         id: int,
+     *         first_name: string,
+     *         last_name: string,
+     *         photo_path: string|null
+     *     },
+     *     cancelled_at: string|null
+     * }
+     */
     private function reservationData(Reservation $reservation): array
     {
         return [

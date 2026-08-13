@@ -3,9 +3,9 @@
 use App\Models\Barber;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Notifications\ReservationConfirmed;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
-use App\Notifications\ReservationConfirmed;
 use Illuminate\Support\Facades\Notification;
 
 function createCancellationTestReservation(

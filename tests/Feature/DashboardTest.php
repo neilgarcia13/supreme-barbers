@@ -17,14 +17,14 @@ test('customers are redirected from dashboard to reserve', function () {
         ->assertRedirect(route('customer.reserve'));
 });
 
-test('admins are redirected from dashboard to admin dashboard', function () {
+test('admins are redirected from dashboard to daily schedule', function () {
     $admin = User::factory()->create([
         'role' => 'admin',
     ]);
 
     $this->actingAs($admin)
         ->get(route('dashboard'))
-        ->assertRedirect(route('admin.dashboard'));
+        ->assertRedirect(route('admin.schedules.index'));
 });
 
 test('customers can access the reserve page', function () {

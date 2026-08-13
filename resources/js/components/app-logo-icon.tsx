@@ -10,13 +10,13 @@ export default function AppLogoIcon({ className, ...props }: AppLogoIconProps) {
             {...props}
         >
             <img
-                src="/images/brand/supreme-barbers-logo-light.png"
+                src="/images/brand/supreme-barbers-logo-light.webp"
                 alt=""
                 aria-hidden="true"
                 className="size-full object-contain dark:hidden"
             />
             <img
-                src="/images/brand/supreme-barbers-logo-dark.png"
+                src="/images/brand/supreme-barbers-logo-dark.webp"
                 alt=""
                 aria-hidden="true"
                 className="hidden size-full object-contain dark:block"

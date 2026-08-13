@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\BarberController;
+use App\Http\Controllers\Admin\BarberScheduleController;
 use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
 use App\Http\Controllers\Customer\ReservationController;
+use App\Http\Controllers\Customer\ReserveController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Customer\ReserveController;
-use App\Http\Controllers\Admin\BarberScheduleController;
 
 // Public landing page route
 Route::inertia('/', 'landing')->name('home');
@@ -14,7 +14,7 @@ Route::inertia('/', 'landing')->name('home');
 // Shared post-login redirect
 Route::get('/dashboard', function (Request $request) {
     return match ($request->user()->role) {
-        'admin' => redirect()->route('admin.dashboard'),
+        'admin' => redirect()->route('admin.schedules.index'),
         'customer' => redirect()->route('customer.reserve'),
         default => abort(403),
     };
@@ -36,8 +36,6 @@ Route::middleware(['auth', 'verified', 'customer'])->group(function () {
 
 // Admin management pages
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::inertia('/admin/dashboard', 'admin/dashboard')->name('admin.dashboard');
-
     Route::get('/admin/barbers', [BarberController::class, 'index'])
         ->name('admin.barbers.index');
 
@@ -64,4 +62,4 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 // Account settings routes
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

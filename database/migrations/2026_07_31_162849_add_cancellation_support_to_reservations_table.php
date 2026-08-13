@@ -2,12 +2,12 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -26,7 +26,7 @@ return new class extends Migration {
                 foreach ($reservations as $reservation) {
                     $startsAt = Carbon::parse(
                         $reservation->starts_at,
-                         config('app.timezone')
+                        config('app.timezone')
                     );
 
                     $slotKey = sprintf(

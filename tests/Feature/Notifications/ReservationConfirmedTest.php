@@ -78,8 +78,7 @@ it('omits the notes line when no notes were provided', function () {
         ->toMail($customer);
 
     $containsNotes = collect($mail->introLines)->contains(
-        fn ($line): bool =>
-            is_string($line) &&
+        fn ($line): bool => is_string($line) &&
             str_starts_with($line, 'Notes:')
     );
 

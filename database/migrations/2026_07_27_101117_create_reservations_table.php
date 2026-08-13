@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')
-            ->constrained()
-            ->restrictOnDelete();
+                ->constrained()
+                ->restrictOnDelete();
 
             $table->foreignId('barber_id')
-            ->constrained()
-            ->restrictOnDelete();
+                ->constrained()
+                ->restrictOnDelete();
 
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');
