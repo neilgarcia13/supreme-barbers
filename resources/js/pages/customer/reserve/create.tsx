@@ -592,9 +592,6 @@ const Create = ({ barber, max_reservation_date }: Props) => {
                   className="w-full sm:w-auto cursor-pointer"
                   onClick={() => void handleReserve()}
                 >
-                  {isSubmitting && (
-                    <LoaderCircle className="animate-spin" />
-                  )}
                   {isSubmitting
                     ? 'Confirming Reservation'
                     : 'Confirm Reservation'}

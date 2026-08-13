@@ -2,12 +2,16 @@ import { Head, Link } from '@inertiajs/react';
 import {
     CalendarClock,
     Clock3,
+    Download,
+    LoaderCircle,
     RefreshCw,
     StickyNote,
     UserRound,
     UsersRound,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { toPng } from 'html-to-image';
+import { toast } from 'sonner';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,40 +26,19 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ApiError, apiRequest } from '@/lib/api';
-
-type Barber = {
-    id: number;
-    first_name: string;
-    last_name: string;
-    is_active: boolean;
-};
+import DailyScheduleExport, {
+    type ScheduleBarber,
+    type ScheduleReservation,
+    type ScheduleSlot,
+} from '@/components/admin/daily-schedule-export';
 
 type Props = {
     today: string;
-    barbers: Barber[];
-};
-
-type ScheduleReservation = {
-    id: number;
-    starts_at: string;
-    ends_at: string;
-    notes: string | null;
-    status: 'confirmed';
-    customer: {
-        id: number;
-        name: string;
-    };
+    barbers: ScheduleBarber[];
 };
 
 type ScheduleResponse = {
     reservations: ScheduleReservation[];
-};
-
-type ScheduleSlot = {
-    startsAt: Date;
-    endsAt: Date;
-    reservation: ScheduleReservation | null;
-    isElapsed: boolean;
 };
 
 type SlotStatus =
@@ -115,6 +98,9 @@ const Index = ({ today, barbers }: Props) => {
     const [error, setError] = useState<string | null>(null);
     const [refreshKey, setRefreshKey] = useState(0);
     const [currentTime, setCurrentTime] = useState(() => Date.now());
+
+    const exportRef = useRef<HTMLDivElement>(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const selectedBarber = barbers.find(
         (barber) => String(barber.id) === barberId,
@@ -200,6 +186,47 @@ const Index = ({ today, barbers }: Props) => {
         return () => controller.abort();
     }, [date, barberId, refreshKey]);
 
+    const handleDownloadPng = async () => {
+        const exportElement = exportRef.current;
+
+        if (!exportElement || !selectedBarber || !date) {
+            return;
+        }
+
+        setIsExporting(true);
+
+        try {
+            await document.fonts.ready;
+
+            const dataUrl = await toPng(exportElement, {
+                backgroundColor: '#ffffff',
+                cacheBust: true,
+                pixelRatio: 1,
+            });
+
+            const barberSlug =
+                `${selectedBarber.first_name}-${selectedBarber.last_name}`
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-|-$/g, '') ||
+                `barber-${selectedBarber.id}`;
+
+            const downloadLink = document.createElement('a');
+
+            downloadLink.href = dataUrl;
+            downloadLink.download =
+                `${barberSlug}-${date}-daily-schedule.png`;
+
+            downloadLink.click();
+
+            toast.success('Daily schedule downloaded.');
+        } catch {
+            toast.error('Failed to download the daily schedule.');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <>
             <Head title="Daily Schedule" />
@@ -259,19 +286,52 @@ const Index = ({ today, barbers }: Props) => {
                         </Select>
                     </div>
 
-                    <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full md:w-auto"
-                        disabled={!date || !barberId || isLoading}
-                        onClick={() => setRefreshKey((current) => current + 1)}
-                    >
-                        <RefreshCw
-                            className={isLoading ? 'animate-spin' : undefined}
-                        />
-                        Refresh
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="flex-1 md:flex-none"
+                            disabled={!date || !barberId || isLoading}
+                            onClick={() => setRefreshKey((current) => current + 1)}
+                        >
+                            <RefreshCw
+                                className={isLoading ? 'animate-spin' : undefined}
+                            />
+                            Refresh
+                        </Button>
+
+                        <Button
+                            type="button"
+                            className="flex-1 md:flex-none cursor-pointer"
+                            disabled={
+                                !selectedBarber ||
+                                !selectedDate ||
+                                isLoading ||
+                                Boolean(error) ||
+                                isExporting
+                            }
+                            onClick={handleDownloadPng}
+                        >
+                            <Download />
+                            {isExporting ? 'Generating...' : 'Download PNG'}
+                        </Button>
+                    </div>
                 </div>
+
+                {selectedBarber && selectedDate && !isLoading && !error && (
+                    <div
+                        aria-hidden="true"
+                        className="pointer-events-none fixed top-0 left-[-10000px]"
+                    >
+                        <DailyScheduleExport
+                            ref={exportRef}
+                            barber={selectedBarber}
+                            date={selectedDate}
+                            slots={scheduleSlots}
+                            currentTime={currentTime}
+                        />
+                    </div>
+                )}
 
                 <div className="overflow-hidden rounded-lg border">
                     <div className="flex flex-col gap-4 border-b bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">

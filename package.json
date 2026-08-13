@@ -53,6 +53,7 @@
         "concurrently": "^9.0.1",
         "date-fns": "^4.4.0",
         "globals": "^15.14.0",
+        "html-to-image": "^1.11.13",
         "laravel-vite-plugin": "^3.0.0",
         "lucide-react": "^0.475.0",
         "radix-ui": "^1.6.0",
