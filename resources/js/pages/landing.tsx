@@ -54,13 +54,13 @@ const reservationSteps = [
         number: '02',
         title: 'Choose your barber',
         description:
-            'Select your preferred barber and review their open appointment times.',
+            'Select your preferred barber and review their open reservation times.',
     },
     {
         number: '03',
         title: 'Reserve your time',
         description:
-            'Confirm a one-hour appointment and receive the details by email.',
+            'Confirm a one-hour reservation and receive the details by email.',
     },
 ];
 
@@ -293,7 +293,7 @@ const Landing = () => {
                                 <p className="mt-6 max-w-2xl text-base leading-7 text-neutral-200 sm:text-lg">
                                     Check which barbers are available, choose
                                     your preferred barber, and reserve a
-                                    one-hour appointment before visiting the
+                                    one-hour reservation before visiting the
                                     shop.
                                 </p>
 
@@ -508,7 +508,7 @@ const Landing = () => {
                                 </span>
                                 <div>
                                     <p className="text-sm text-muted-foreground">
-                                        Appointment duration
+                                        Reservation duration
                                     </p>
                                     <p className="mt-1 font-semibold">
                                         One hour
