@@ -18,8 +18,7 @@ class ReservationConfirmed extends Notification implements ShouldQueue
      */
     public function __construct(
         public Reservation $reservation,
-    ) {
-    }
+    ) {}
 
     /**
      * Get the notification's delivery channels.
