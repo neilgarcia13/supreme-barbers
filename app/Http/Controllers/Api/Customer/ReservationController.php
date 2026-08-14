@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Api\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreReservationRequest;
 use App\Models\Reservation;
+use App\Models\User;
 use App\Notifications\ReservationConfirmed;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReservationController extends Controller
@@ -70,18 +72,46 @@ class ReservationController extends Controller
     {
         $validated = $request->validated();
 
-        $startsAt = Carbon::parse($validated['starts_at'])->setTimezone(config('app.timezone'));
+        $startsAt = Carbon::parse($validated['starts_at'])
+            ->setTimezone(config('app.timezone'));
+
         $endsAt = $startsAt->copy()->addHour();
 
+        /** @var User $user */
+        $user = $request->user();
+
         try {
-            $reservation = Reservation::create([
-                'user_id' => $request->user()->id,
-                'barber_id' => $validated['barber_id'],
-                'starts_at' => $startsAt,
-                'ends_at' => $endsAt,
-                'status' => 'confirmed',
-                'notes' => $validated['notes'] ?? null,
-            ]);
+            $reservation = DB::transaction(
+                function () use ($user, $validated, $startsAt, $endsAt): Reservation {
+                    User::query()
+                        ->whereKey($user->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    $activeReservationCount = Reservation::query()
+                        ->where('user_id', $user->id)
+                        ->where('status', 'confirmed')
+                        ->where('ends_at', '>', now())
+                        ->count();
+
+                    if ($activeReservationCount >= 2) {
+                        throw ValidationException::withMessages([
+                            'starts_at' => [
+                                'You can only have two active upcoming reservations at a time.',
+                            ],
+                        ]);
+                    }
+
+                    return Reservation::create([
+                        'user_id' => $user->id,
+                        'barber_id' => $validated['barber_id'],
+                        'starts_at' => $startsAt,
+                        'ends_at' => $endsAt,
+                        'status' => 'confirmed',
+                        'notes' => $validated['notes'] ?? null,
+                    ]);
+                }
+            );
         } catch (UniqueConstraintViolationException) {
             return response()->json([
                 'message' => 'The selected appointment is no longer available.',
@@ -97,7 +127,7 @@ class ReservationController extends Controller
             'barber:id,first_name,last_name,photo_path'
         );
 
-        $request->user()->notify(
+        $user->notify(
             new ReservationConfirmed($reservation)
         );
 
@@ -105,7 +135,6 @@ class ReservationController extends Controller
             'message' => 'Reservation confirmed successfully.',
             'reservation' => $reservation,
         ], Response::HTTP_CREATED);
-
     }
 
     /**
