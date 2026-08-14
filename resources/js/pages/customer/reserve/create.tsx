@@ -260,7 +260,7 @@ const Create = ({ barber, max_reservation_date }: Props) => {
 
                     setSubmissionError(
                         firstValidationError ??
-                        'Check the reservation information and try again.',
+                            'Check the reservation information and try again.',
                     );
 
                     return;
@@ -374,9 +374,9 @@ const Create = ({ barber, max_reservation_date }: Props) => {
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     {selectedDate
                                         ? format(
-                                            selectedDate,
-                                            'EEEE, MMMM d, yyyy',
-                                        )
+                                              selectedDate,
+                                              'EEEE, MMMM d, yyyy',
+                                          )
                                         : 'Choose a date to view availability'}
                                 </p>
                             </div>
@@ -465,11 +465,11 @@ const Create = ({ barber, max_reservation_date }: Props) => {
                                                 className={cn(
                                                     'h-16 w-full flex-col gap-1 px-2 whitespace-normal disabled:opacity-100',
                                                     slot.status ===
-                                                    'reserved' &&
-                                                    'border-dashed bg-muted/70 text-muted-foreground dark:bg-muted/40',
+                                                        'reserved' &&
+                                                        'border-dashed bg-muted/70 text-muted-foreground dark:bg-muted/40',
                                                     slot.status ===
-                                                    'unavailable' &&
-                                                    'border-transparent bg-muted/30 text-muted-foreground',
+                                                        'unavailable' &&
+                                                        'border-transparent bg-muted/30 text-muted-foreground',
                                                 )}
                                             >
                                                 <span className="text-sm font-medium">
@@ -483,13 +483,13 @@ const Create = ({ barber, max_reservation_date }: Props) => {
                                                         isSelected
                                                             ? 'text-primary-foreground/75'
                                                             : isAvailable
-                                                                ? 'text-emerald-700 dark:text-emerald-400'
-                                                                : 'text-muted-foreground',
+                                                              ? 'text-emerald-700 dark:text-emerald-400'
+                                                              : 'text-muted-foreground',
                                                     )}
                                                 >
                                                     {
                                                         slotStatusLabels[
-                                                        slot.status
+                                                            slot.status
                                                         ]
                                                     }
                                                 </span>
@@ -561,7 +561,7 @@ const Create = ({ barber, max_reservation_date }: Props) => {
                             </div>
 
                             {submissionError && (
-                                <Alert className='text-destructive'>
+                                <Alert className="text-destructive">
                                     <AlertCircle />
                                     <AlertTitle>
                                         Failed to confirm reservation. Please
@@ -591,7 +591,8 @@ const Create = ({ barber, max_reservation_date }: Props) => {
                                 </Button>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                You can have up to two active upcoming reservations.
+                                You can have up to two active upcoming
+                                reservations.
                             </p>
                         </div>
                     </section>

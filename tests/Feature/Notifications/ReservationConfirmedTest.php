@@ -40,24 +40,29 @@ it('builds the reservation confirmation email', function () {
     $mail = (new ReservationConfirmed($reservation))
         ->toMail($customer);
 
+    $html = (string) $mail->render();
+
     expect($mail->subject)
         ->toBe('Your reservation is confirmed')
-        ->and($mail->greeting)
-        ->toBe('Hello Juan Customer,')
-        ->and($mail->introLines)
-        ->toContain('Your reservation at Supreme Barbers is confirmed.')
-        ->and($mail->introLines)
-        ->toContain('Barber: Pedro Santos')
-        ->and($mail->introLines)
-        ->toContain('Date: Monday, August 10, 2026')
-        ->and($mail->introLines)
-        ->toContain('Time: 9:00 AM - 10:00 AM')
-        ->and($mail->introLines)
-        ->toContain('Notes: Please keep the sides short.')
-        ->and($mail->actionText)
-        ->toBe('View My Reservations')
-        ->and($mail->actionUrl)
-        ->toBe(url('/my-reservations'));
+        ->and($mail->markdown)
+        ->toBe('mail.reservations.confirmed')
+        ->and($mail->viewData)
+        ->toMatchArray([
+            'customerName' => 'Juan Customer',
+            'barberName' => 'Pedro Santos',
+            'date' => 'Monday, August 10, 2026',
+            'time' => '9:00 AM - 10:00 AM',
+            'notes' => 'Please keep the sides short.',
+            'reservationsUrl' => url('/my-reservations'),
+        ]);
+
+    expect($html)
+        ->toContain('Hello Juan Customer,')
+        ->toContain('Pedro Santos')
+        ->toContain('Monday, August 10, 2026')
+        ->toContain('9:00 AM - 10:00 AM')
+        ->toContain('Please keep the sides short.')
+        ->toContain('View My Reservations');
 });
 
 it('omits the notes line when no notes were provided', function () {
@@ -77,10 +82,8 @@ it('omits the notes line when no notes were provided', function () {
     $mail = (new ReservationConfirmed($reservation))
         ->toMail($customer);
 
-    $containsNotes = collect($mail->introLines)->contains(
-        fn ($line): bool => is_string($line) &&
-            str_starts_with($line, 'Notes:')
-    );
+    $html = (string) $mail->render();
 
-    expect($containsNotes)->toBeFalse();
+    expect($mail->viewData['notes'])->toBeNull()
+        ->and($html)->not->toContain('Reservation notes');
 });
