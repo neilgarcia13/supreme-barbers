@@ -18,7 +18,8 @@ class ReservationConfirmed extends Notification implements ShouldQueue
      */
     public function __construct(
         public Reservation $reservation,
-    ) {}
+    ) {
+    }
 
     /**
      * Get the notification's delivery channels.
@@ -51,25 +52,20 @@ class ReservationConfirmed extends Notification implements ShouldQueue
             $this->reservation->barber->last_name,
         );
 
-        $message = (new MailMessage)
+        return (new MailMessage)
             ->subject('Your reservation is confirmed')
-            ->greeting("Hello {$notifiable->name},")
-            ->line('Your reservation at Supreme Barbers is confirmed.')
-            ->line("Barber: {$barberName}")
-            ->line("Date: {$startsAt->format('l, F j, Y')}")
-            ->line(sprintf(
-                'Time: %s - %s',
-                $startsAt->format('g:i A'),
-                $endsAt->format('g:i A'),
-            ));
-
-        if (filled($this->reservation->notes)) {
-            $message->line("Notes: {$this->reservation->notes}");
-        }
-
-        return $message
-            ->action('View My Reservations', url('/my-reservations'))
-            ->line('Please arrive a few minutes before your appointment.');
+            ->markdown('mail.reservations.confirmed', [
+                'customerName' => $notifiable->name,
+                'barberName' => $barberName,
+                'date' => $startsAt->format('l, F j, Y'),
+                'time' => sprintf(
+                    '%s - %s',
+                    $startsAt->format('g:i A'),
+                    $endsAt->format('g:i A'),
+                ),
+                'notes' => $this->reservation->notes,
+                'reservationsUrl' => url('/my-reservations'),
+            ]);
     }
 
     /**
